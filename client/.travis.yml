@@ -1,0 +1,19 @@
+language: generic
+sudo: required
+services: 
+    - docker
+before_install:
+    - docker build t react-test -f Dockerfile.dev
+script:
+    - docker run -e CI=true USERNAME/react-test npm test
+
+after_success:
+    - docker build -t erikaleigh/multi-client ./client
+    - docker build -t erikaleigh/multi-nginx ./nginx
+    - docker build -t erikaleigh/multi-server ./server
+    - docker build -t erikaleigh/multi-worker ./worker
+    - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_ID" --password-stdin
+    - docker push erikaleigh/multi-client
+    - docker push erikaleigh/multi-nginx
+    - docker push erikaleigh/multi-server
+    - docker push erikaleigh/multi-worker
